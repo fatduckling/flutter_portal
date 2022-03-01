@@ -187,8 +187,10 @@ of our button.
 Finally, we can update our code such that the menu show only when clicking
 on the button.
 
-To do that, we need to declare a new boolean inside our `StatefulWidget`,
-that says whether the menu is open or not:
+To do that, there are two ways we can do this by either declaring a boolean member variable or using Flutter's [FocusNode](https://api.flutter.dev/flutter/widgets/FocusNode-class.html) class.
+
+#### 1. Using boolean member variable
+We need to declare a new boolean inside our `StatefulWidget`, that says whether the menu is open or not:
 
 ```dart
 class _MenuExampleState extends State<MenuExample> {
@@ -245,6 +247,53 @@ Center(
     ),
   ),
 )
+```
+
+#### 2. Using a FocusNode instead
+Declare a new `FocusNode` which will show the menu if there is focus on the `RaisedButton`
+
+```dart
+final FocusNode _focusNode = FocusNode();
+
+...
+@override
+void dispose() {
+  _focusNode.dispose();
+  super.dispose();
+}
+
+...
+```
+
+In the PortalEntry, set the `visible` property to `_focusNode.hasFocus`:
+
+```dart
+child: PortalEntry(
+  ...
+  visible: _focusNode.hasFocus,
+  ...
+  portalAnchor: Alignment.topCenter,
+  childAnchor: Alignment.bottomCenter,
+  portal: (...)
+```
+
+Finally, in the `RaisedButton`, assign the `focusNode` property to the member object and on its `onFocusChange` function, create an empty `setState(){}` (to re-trigger the build). Set the `onPressed` on the `RaisedButton` to request focus on the `FocusNode`.
+
+```dart
+portal: Material(...),
+),
+child: RaisedButton(
+  ...
+  focusNode: _focusNode,
+  onFocusChange: (hasFocus) {
+    setState(() {
+    });
+  },
+  onPressed: () {
+    _focusNode.requestFocus();
+  },
+  ...
+);
 ```
 
 ## Concepts
